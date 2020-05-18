@@ -19,7 +19,7 @@ const SingleRecipe = () => {
     const getRecipe = async (recipeId) => {
         try {
             let { data } = await axios.get(`/api/recipes/${recipeId}`)
-            console.log(data.payload)
+            // console.log(data.payload)
             setRecipe(data.payload)  
     
         } catch (error) {

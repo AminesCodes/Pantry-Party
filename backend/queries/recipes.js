@@ -182,6 +182,44 @@ const getRecipesByUserId = async (userId) => {
     return db.any(selectQuery, userId);
 }
 
+// POST A RECIPE: this will probably replace createRecipe if approved
+const addRecipe = async (recipe) => {
+    const recipePostQuery = `
+        INSERT INTO recipes (
+            user_id,
+            recipe_name,
+            directions,
+            recipe_img,
+            recipe_public
+        ) VALUES (
+            $/user_id/,
+            $/recipe_name/,
+            $/directions/,
+            $/recipe_img/,
+            $/recipe_public/
+        )
+        RETURNING *;
+    `;
+
+    const newRecipe = await db.one(recipePostQuery, recipe);
+
+    const ingredientsPostQuery = `
+    INSERT INTO ingredients (
+        ingredient_name,
+        amount,
+        measurement,
+        recipe_id
+        ) VALUES ($1, $2, $3, $4);
+        `;
+        
+    const promises = recipe.ingredients.map(ingredient => {
+        db.none(ingredientsPostQuery, [ingredient.ing, ingredient.amn, ingredient.meas, newRecipe.id])
+    })
+    await Promise.all(promises)
+    
+    return recipe
+}
+
 /* EXPORT */
 module.exports = {
     getRecipeById,
@@ -193,5 +231,6 @@ module.exports = {
     createFullRecipe,
     getSingleRecipeById,
     getRecipesByUserId,
+    addRecipe
 }
 
